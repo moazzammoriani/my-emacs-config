@@ -79,7 +79,7 @@
    '("1d5e33500bc9548f800f9e248b57d1b2a9ecde79cb40c0b1398dec51ee820daf" default))
  '(ivy-mode t)
  '(package-selected-packages
-   '(vi-tilde-fringe visual-fill-column org-bullets org-superstar general evil-smartparens smartparens parinfer-rust-mode highlight-parentheses evil-surround doom-themes helpful ivy-rich which-key rainbow-delimiters doom-modeline counsel swiper ivy use-package no-littering evil-collection auto-package-update))
+   '(evil vi-tilde-fringe visual-fill-column org-bullets org-superstar general evil-smartparens smartparens parinfer-rust-mode highlight-parentheses evil-surround doom-themes helpful ivy-rich which-key rainbow-delimiters doom-modeline counsel swiper ivy use-package no-littering evil-collection auto-package-update))
  '(which-key-mode t))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
@@ -223,7 +223,7 @@
   (set-face-attribute 'org-checkbox nil :inherit 'fixed-pitch))
 
 (use-package org
-  :hook (org-mode . system-crafters/org-mode-setup)
+  :hook (org-mode . system-crafters/org-mode-setup) 
   :config
   (setq org-ellipsis " ▾")
   (system-crafters/org-font-setup))
@@ -235,15 +235,29 @@
 
 
 (defun efs/org-mode-visual-fill ()
-  (setq visual-fill-column-width 100
+  (setq visual-fill-column-width 110
         visual-fill-column-center-text t
   (visual-fill-column-mode 1)))
 
 (use-package visual-fill-column
   :hook (org-mode . efs/org-mode-visual-fill))
 
+(add-hook 'org-mode-hook 'visual-fill-column-mode)
+
 (add-hook 'org-mode-hook 'visual-line-mode)
 
 (use-package vi-tilde-fringe                        ;; get vim-like tilde's to denote unused lines
   :config (global-vi-tilde-fringe-mode))
 
+
+(org-babel-do-load-languages                      ;; load languages for org-babel
+  'org-babel-load-language
+  '((emacs-lisp . t)
+    (python . t)
+	(C . t)
+	(shell .t)
+	(js . t)
+	(scheme .t)
+	(lisp .t)
+	(haskell . t)
+	(latex . t) ) )
