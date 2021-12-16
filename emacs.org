@@ -1,139 +1,6 @@
 #+TITLE:  Emacs Org Config
 #+PROPERTY: header-args:emacs-lisp :tangle ./init.el :mkdirp yes
 
-* UI Configuration
-** Removal of the first default emacs things
-  The first line prevents the assult from emacs' default message on startup. What follows is the removal of all the unnecessary UI elements for someone who prefers using the keyboard more than the mouse.
-
-
-#+begin_src emacs-lisp 
-
-(setq inhibit-startup-message t)
-
-(scroll-bar-mode -1)           ;; Disable scrollvar visibility
-(tool-bar-mode -1)             ;; Disable emacs toolbar
-(tooltip-mode -1)              ;; disable tooltips
-(menu-bar-mode -1)             ;; disable the menu
-
-#+end_src
-
-** Fonts
-
-   Setting up Fira Code
-   
-#+begin_src emacs-lisp 
-
-(set-face-attribute 'default nil :font "Fira Code" :height 130)
-
-#+end_src
-
-** Theme
-   #+begin_src emacs-lisp
-(use-package doom-themes)
-(load-theme 'doom-dark+ t)  ;; the t tells emacs that yes I do indeed want to load an external theme
-(set-face-background 'show-paren-match "#4d4b4b") ;; highlight matching parenthesis
-   #+end_src
-** Relative line numbers like in vim
-   #+begin_src emacs-lisp
-(column-number-mode)
-(setq-default display-line-numbers 'visual          ;; this sets displays the line number to relative AND accounts for folding in things like org mode
-	      display-line-numbers-current-absolute t
-	      display-line-numbers-width 2
-	      display-line-numbers-widen t)
-   #+end_src
-
-* Interaction
-** Counsel key-bindings
-#+begin_src emacs-lisp :noweb-ref counsel-use-package-config :tangle no
-  :bind (("M-x ". counsel-M-x)
-         ("C-x b" . counsel-ibuffer)
-         ("C-x t". counsel-load-theme)
-         ("C-x C-f" . counsel-find-file)
-         :map minibuffer-local-map
-         ("C-r" . counsel-mini-buffer-history))
-  :config
-  (setq ivy-initial-inputs-alist nil)
-#+end_src
-** Esc key to quit binding
-   #+begin_src emacs-lisp
-(global-set-key (kbd "<escape>") 'keyboard-escape-quit)      ;; Use <esc> to exit prompts
-   #+end_src
-** Autocomplete parentheses and other delimiters
-   This is accomplished by attaching the showparens hook
-   #+begin_src emacs-lisp
-(add-hook 'text-mode-hook #'show-paren-mode) ;; attaching show-parens-mode to the prog-mode hook
-   #+end_src
-** Tabs width
-   #+begin_src emacs-lisp
-(setq-default tab-width 4)        ;; set the tab width to 4
-   #+end_src
-** Switch buffer with C-M-j
-   #+begin_src emacs-lisp
-(global-set-key (kbd "C-M-j") 'counsel-switch-buffer) ;; globally map the combination of <CTRL>-<ALT>-j to the counsel-switch-buffer command
-   #+end_src
-* Org
-** Org-babel languages
-   #+begin_src emacs-lisp
-(org-babel-do-load-languages                      ;; load languages for org-babel
-  'org-babel-load-language
-  '((emacs-lisp . t)
-    (python . t)
-	(C . t)
-	(shell .t)
-	(js . t)
-	(scheme .t)
-	(lisp .t)
-	(haskell . t)
-	(latex . t) ) )
-
-   #+end_src
-
-** Look
-   #+begin_src emacs-lisp
-(defun system-crafters/org-font-setup ()
-  ;; Replace list hyphen with dot
-  (font-lock-add-keywords 'org-mode
-                          '(("^ *\\([-]\\) "
-                             (0 (prog1 () (compose-region (match-beginning 1) (match-end 1) "•"))))))
-
-
-  ;; Set faces for heading levels
-
-  (dolist (face '((org-level-1 . 1.2)
-                  (org-level-2 . 1.1)
-                  (org-level-3 . 1.05)
-                  (org-level-4 . 1.0)
-                  (org-level-5 . 1.1)
-                  (org-level-6 . 1.1)
-                  (org-level-7 . 1.1)
-                  (org-level-8 . 1.1))))
-
-  ;; Ensure that anything that should be fixed-pitch in Org files appears that way
-  (set-face-attribute 'org-block nil :foreground nil :inherit 'fixed-pitch)
-  (set-face-attribute 'org-code nil   :inherit '(shadow fixed-pitch))
-  (set-face-attribute 'org-table nil   :inherit '(shadow fixed-pitch))
-  (set-face-attribute 'org-verbatim nil :inherit '(shadow fixed-pitch))
-  (set-face-attribute 'org-special-keyword nil :inherit '(font-lock-comment-face fixed-pitch))
-  (set-face-attribute 'org-meta-line nil :inherit '(font-lock-comment-face fixed-pitch))
-  (set-face-attribute 'org-checkbox nil :inherit 'fixed-pitch))
-
-
-(defun efs/org-mode-visual-fill ()
-  (setq visual-fill-column-width 110
-        visual-fill-column-center-text t
-  (visual-fill-column-mode 1)))
-
-(add-hook 'org-mode-hook 'visual-fill-column-mode)
-(add-hook 'org-mode-hook 'visual-line-mode)
-   #+end_src
-** Extensions attached to hook
-*** Visu
-* Eshell hooks
-  #+begin_src emacs-lisp
-(dolist (mode '(shell-mode-hook     ;; what this does is that is iterates through the list of hooks and adds the lambda expression inside those hooks
-		eshell-mode-hook))
-  (add-hook mode (lambda () (display-line-numbers-mode 0))))
-  #+end_src
 * Package Management
 ** Setting up use-package 
 
@@ -281,7 +148,8 @@
 	 #+end_src
 *** Org packages
 **** Org
-	 #+begin_src emacs-lisp
+	 #+begin_src emacs-lisp :noweb tangle
+<<system-crafter/org-font-setup-func-def>>
 (use-package org
   :hook (org-mode . system-crafters/org-mode-setup) 
   :config
@@ -315,3 +183,140 @@
   (mm/leader-keys
    "." '(counsel-find-file :which-key "find-files")))
 	#+end_src
+* UI Configuration
+** Removal of the first default emacs things
+  The first line prevents the assult from emacs' default message on startup. What follows is the removal of all the unnecessary UI elements for someone who prefers using the keyboard more than the mouse.
+
+
+#+begin_src emacs-lisp 
+
+(setq inhibit-startup-message t)
+
+(scroll-bar-mode -1)           ;; Disable scrollvar visibility
+(tool-bar-mode -1)             ;; Disable emacs toolbar
+(tooltip-mode -1)              ;; disable tooltips
+(menu-bar-mode -1)             ;; disable the menu
+
+#+end_src
+
+** Fonts
+
+   Setting up Fira Code
+   
+#+begin_src emacs-lisp 
+
+(set-face-attribute 'default nil :font "Fira Code" :height 130)
+
+#+end_src
+
+** Theme
+   #+begin_src emacs-lisp
+(use-package doom-themes)
+(load-theme 'doom-dark+ t)  ;; the t tells emacs that yes I do indeed want to load an external theme
+(set-face-background 'show-paren-match "#4d4b4b") ;; highlight matching parenthesis
+   #+end_src
+** Relative line numbers like in vim
+   #+begin_src emacs-lisp
+(column-number-mode)
+(setq-default display-line-numbers 'visual          ;; this sets displays the line number to relative AND accounts for folding in things like org mode
+	      display-line-numbers-current-absolute t
+	      display-line-numbers-width 2
+	      display-line-numbers-widen t)
+   #+end_src
+
+* Interaction
+** Counsel key-bindings
+#+begin_src emacs-lisp :noweb-ref counsel-use-package-config :tangle no
+  :bind (("M-x ". counsel-M-x)
+         ("C-x b" . counsel-ibuffer)
+         ("C-x t". counsel-load-theme)
+         ("C-x C-f" . counsel-find-file)
+         :map minibuffer-local-map
+         ("C-r" . counsel-mini-buffer-history))
+  :config
+  (setq ivy-initial-inputs-alist nil)
+#+end_src
+** Esc key to quit binding
+   #+begin_src emacs-lisp
+(global-set-key (kbd "<escape>") 'keyboard-escape-quit)      ;; Use <esc> to exit prompts
+   #+end_src
+** Autocomplete parentheses and other delimiters
+   This is accomplished by attaching the showparens hook
+   #+begin_src emacs-lisp
+(add-hook 'text-mode-hook #'show-paren-mode) ;; attaching show-parens-mode to the prog-mode hook
+   #+end_src
+** Tabs width
+   #+begin_src emacs-lisp
+(setq-default tab-width 4)        ;; set the tab width to 4
+   #+end_src
+** Switch buffer with C-M-j
+   #+begin_src emacs-lisp
+(global-set-key (kbd "C-M-j") 'counsel-switch-buffer) ;; globally map the combination of <CTRL>-<ALT>-j to the counsel-switch-buffer command
+   #+end_src
+* Org
+** Org-babel languages
+   #+begin_src emacs-lisp
+(org-babel-do-load-languages                      ;; load languages for org-babel
+  'org-babel-load-language
+  '((emacs-lisp . t)
+    (python . t)
+	(C . t)
+	(shell .t)
+	(js . t)
+	(scheme .t)
+	(lisp .t)
+	(haskell . t)
+	(latex . t) ) )
+
+   #+end_src
+
+** Look
+   This is tangled right above the org package's installation. Tangling it above the org-installation declaration is part of my ugly solution to get the function references times correctly
+#+begin_src emacs-lisp :noweb-ref system-crafter/org-font-setup-func-def
+(defun system-crafters/org-font-setup ()
+  ;; Replace list hyphen with dot
+  (font-lock-add-keywords 'org-mode
+                          '(("^ *\\([-]\\) "
+                             (0 (prog1 () (compose-region (match-beginning 1) (match-end 1) "•"))))))
+
+
+  ;; Set faces for heading levels
+
+  (dolist (face '((org-level-1 . 1.2)
+                  (org-level-2 . 1.1)
+                  (org-level-3 . 1.05)
+                  (org-level-4 . 1.0)
+                  (org-level-5 . 1.1)
+                  (org-level-6 . 1.1)
+                  (org-level-7 . 1.1)
+                  (org-level-8 . 1.1))))
+
+  ;; Ensure that anything that should be fixed-pitch in Org files appears that way
+  (set-face-attribute 'org-block nil :foreground nil :inherit 'fixed-pitch)
+  (set-face-attribute 'org-code nil   :inherit '(shadow fixed-pitch))
+  (set-face-attribute 'org-table nil   :inherit '(shadow fixed-pitch))
+  (set-face-attribute 'org-verbatim nil :inherit '(shadow fixed-pitch))
+  (set-face-attribute 'org-special-keyword nil :inherit '(font-lock-comment-face fixed-pitch))
+  (set-face-attribute 'org-meta-line nil :inherit '(font-lock-comment-face fixed-pitch))
+  (set-face-attribute 'org-checkbox nil :inherit 'fixed-pitch))
+
+(defun efs/org-mode-visual-fill ()
+  (setq visual-fill-column-width 110
+        visual-fill-column-center-text t
+  (visual-fill-column-mode 1)))
+
+#+end_src
+
+And this of course has to be called after the visual-fill mode package has been installed
+#+begin_src emacs-lisp
+
+(add-hook 'org-mode-hook 'visual-fill-column-mode)
+(add-hook 'org-mode-hook 'visual-line-mode)
+   #+end_src
+** Extensions attached to hook
+* Eshell hooks
+  #+begin_src emacs-lisp
+(dolist (mode '(shell-mode-hook     ;; what this does is that is iterates through the list of hooks and adds the lambda expression inside those hooks
+		eshell-mode-hook))
+  (add-hook mode (lambda () (display-line-numbers-mode 0))))
+  #+end_src

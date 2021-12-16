@@ -1,82 +1,3 @@
-(setq inhibit-startup-message t)
-
-(scroll-bar-mode -1)           ;; Disable scrollvar visibility
-(tool-bar-mode -1)             ;; Disable emacs toolbar
-(tooltip-mode -1)              ;; disable tooltips
-(menu-bar-mode -1)             ;; disable the menu
-
-(set-face-attribute 'default nil :font "Fira Code" :height 130)
-
-(use-package doom-themes)
-(load-theme 'doom-dark+ t)  ;; the t tells emacs that yes I do indeed want to load an external theme
-(set-face-background 'show-paren-match "#4d4b4b") ;; highlight matching parenthesis
-
-(column-number-mode)
-(setq-default display-line-numbers 'visual          ;; this sets displays the line number to relative AND accounts for folding in things like org mode
-	      display-line-numbers-current-absolute t
-	      display-line-numbers-width 2
-	      display-line-numbers-widen t)
-
-(global-set-key (kbd "<escape>") 'keyboard-escape-quit)      ;; Use <esc> to exit prompts
-
-(add-hook 'text-mode-hook #'show-paren-mode) ;; attaching show-parens-mode to the prog-mode hook
-
-(setq-default tab-width 4)        ;; set the tab width to 4
-
-(global-set-key (kbd "C-M-j") 'counsel-switch-buffer) ;; globally map the combination of <CTRL>-<ALT>-j to the counsel-switch-buffer command
-
-(org-babel-do-load-languages                      ;; load languages for org-babel
-  'org-babel-load-language
-  '((emacs-lisp . t)
-    (python . t)
-	(C . t)
-	(shell .t)
-	(js . t)
-	(scheme .t)
-	(lisp .t)
-	(haskell . t)
-	(latex . t) ) )
-
-(defun system-crafters/org-font-setup ()
-  ;; Replace list hyphen with dot
-  (font-lock-add-keywords 'org-mode
-                          '(("^ *\\([-]\\) "
-                             (0 (prog1 () (compose-region (match-beginning 1) (match-end 1) "•"))))))
-
-
-  ;; Set faces for heading levels
-
-  (dolist (face '((org-level-1 . 1.2)
-                  (org-level-2 . 1.1)
-                  (org-level-3 . 1.05)
-                  (org-level-4 . 1.0)
-                  (org-level-5 . 1.1)
-                  (org-level-6 . 1.1)
-                  (org-level-7 . 1.1)
-                  (org-level-8 . 1.1))))
-
-  ;; Ensure that anything that should be fixed-pitch in Org files appears that way
-  (set-face-attribute 'org-block nil :foreground nil :inherit 'fixed-pitch)
-  (set-face-attribute 'org-code nil   :inherit '(shadow fixed-pitch))
-  (set-face-attribute 'org-table nil   :inherit '(shadow fixed-pitch))
-  (set-face-attribute 'org-verbatim nil :inherit '(shadow fixed-pitch))
-  (set-face-attribute 'org-special-keyword nil :inherit '(font-lock-comment-face fixed-pitch))
-  (set-face-attribute 'org-meta-line nil :inherit '(font-lock-comment-face fixed-pitch))
-  (set-face-attribute 'org-checkbox nil :inherit 'fixed-pitch))
-
-
-(defun efs/org-mode-visual-fill ()
-  (setq visual-fill-column-width 110
-        visual-fill-column-center-text t
-  (visual-fill-column-mode 1)))
-
-(add-hook 'org-mode-hook 'visual-fill-column-mode)
-(add-hook 'org-mode-hook 'visual-line-mode)
-
-(dolist (mode '(shell-mode-hook     ;; what this does is that is iterates through the list of hooks and adds the lambda expression inside those hooks
-		eshell-mode-hook))
-  (add-hook mode (lambda () (display-line-numbers-mode 0))))
-
 ;; Initialize package sources
 
 
@@ -198,6 +119,38 @@
 (use-package vi-tilde-fringe                        ;; get vim-like tilde's to denote unused lines
   :config (global-vi-tilde-fringe-mode))
 
+(defun system-crafters/org-font-setup ()
+  ;; Replace list hyphen with dot
+  (font-lock-add-keywords 'org-mode
+                          '(("^ *\\([-]\\) "
+                             (0 (prog1 () (compose-region (match-beginning 1) (match-end 1) "•"))))))
+
+
+  ;; Set faces for heading levels
+
+  (dolist (face '((org-level-1 . 1.2)
+                  (org-level-2 . 1.1)
+                  (org-level-3 . 1.05)
+                  (org-level-4 . 1.0)
+                  (org-level-5 . 1.1)
+                  (org-level-6 . 1.1)
+                  (org-level-7 . 1.1)
+                  (org-level-8 . 1.1))))
+
+  ;; Ensure that anything that should be fixed-pitch in Org files appears that way
+  (set-face-attribute 'org-block nil :foreground nil :inherit 'fixed-pitch)
+  (set-face-attribute 'org-code nil   :inherit '(shadow fixed-pitch))
+  (set-face-attribute 'org-table nil   :inherit '(shadow fixed-pitch))
+  (set-face-attribute 'org-verbatim nil :inherit '(shadow fixed-pitch))
+  (set-face-attribute 'org-special-keyword nil :inherit '(font-lock-comment-face fixed-pitch))
+  (set-face-attribute 'org-meta-line nil :inherit '(font-lock-comment-face fixed-pitch))
+  (set-face-attribute 'org-checkbox nil :inherit 'fixed-pitch))
+
+(defun efs/org-mode-visual-fill ()
+  (setq visual-fill-column-width 110
+        visual-fill-column-center-text t
+  (visual-fill-column-mode 1)))
+
 (use-package org
   :hook (org-mode . system-crafters/org-mode-setup) 
   :config
@@ -222,3 +175,81 @@
                           :global-prefix "C-SPC")      ;; works in evil insert mode as well
   (mm/leader-keys
    "." '(counsel-find-file :which-key "find-files")))
+
+(setq inhibit-startup-message t)
+
+(scroll-bar-mode -1)           ;; Disable scrollvar visibility
+(tool-bar-mode -1)             ;; Disable emacs toolbar
+(tooltip-mode -1)              ;; disable tooltips
+(menu-bar-mode -1)             ;; disable the menu
+
+(set-face-attribute 'default nil :font "Fira Code" :height 130)
+
+(use-package doom-themes)
+(load-theme 'doom-dark+ t)  ;; the t tells emacs that yes I do indeed want to load an external theme
+(set-face-background 'show-paren-match "#4d4b4b") ;; highlight matching parenthesis
+
+(column-number-mode)
+(setq-default display-line-numbers 'visual          ;; this sets displays the line number to relative AND accounts for folding in things like org mode
+	      display-line-numbers-current-absolute t
+	      display-line-numbers-width 2
+	      display-line-numbers-widen t)
+
+(global-set-key (kbd "<escape>") 'keyboard-escape-quit)      ;; Use <esc> to exit prompts
+
+(add-hook 'text-mode-hook #'show-paren-mode) ;; attaching show-parens-mode to the prog-mode hook
+
+(setq-default tab-width 4)        ;; set the tab width to 4
+
+(global-set-key (kbd "C-M-j") 'counsel-switch-buffer) ;; globally map the combination of <CTRL>-<ALT>-j to the counsel-switch-buffer command
+
+(org-babel-do-load-languages                      ;; load languages for org-babel
+  'org-babel-load-language
+  '((emacs-lisp . t)
+    (python . t)
+	(C . t)
+	(shell .t)
+	(js . t)
+	(scheme .t)
+	(lisp .t)
+	(haskell . t)
+	(latex . t) ) )
+
+(defun system-crafters/org-font-setup ()
+  ;; Replace list hyphen with dot
+  (font-lock-add-keywords 'org-mode
+                          '(("^ *\\([-]\\) "
+                             (0 (prog1 () (compose-region (match-beginning 1) (match-end 1) "•"))))))
+
+
+  ;; Set faces for heading levels
+
+  (dolist (face '((org-level-1 . 1.2)
+                  (org-level-2 . 1.1)
+                  (org-level-3 . 1.05)
+                  (org-level-4 . 1.0)
+                  (org-level-5 . 1.1)
+                  (org-level-6 . 1.1)
+                  (org-level-7 . 1.1)
+                  (org-level-8 . 1.1))))
+
+  ;; Ensure that anything that should be fixed-pitch in Org files appears that way
+  (set-face-attribute 'org-block nil :foreground nil :inherit 'fixed-pitch)
+  (set-face-attribute 'org-code nil   :inherit '(shadow fixed-pitch))
+  (set-face-attribute 'org-table nil   :inherit '(shadow fixed-pitch))
+  (set-face-attribute 'org-verbatim nil :inherit '(shadow fixed-pitch))
+  (set-face-attribute 'org-special-keyword nil :inherit '(font-lock-comment-face fixed-pitch))
+  (set-face-attribute 'org-meta-line nil :inherit '(font-lock-comment-face fixed-pitch))
+  (set-face-attribute 'org-checkbox nil :inherit 'fixed-pitch))
+
+(defun efs/org-mode-visual-fill ()
+  (setq visual-fill-column-width 110
+        visual-fill-column-center-text t
+  (visual-fill-column-mode 1)))
+
+(add-hook 'org-mode-hook 'visual-fill-column-mode)
+(add-hook 'org-mode-hook 'visual-line-mode)
+
+(dolist (mode '(shell-mode-hook     ;; what this does is that is iterates through the list of hooks and adds the lambda expression inside those hooks
+		eshell-mode-hook))
+  (add-hook mode (lambda () (display-line-numbers-mode 0))))
