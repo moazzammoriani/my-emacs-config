@@ -3,9 +3,10 @@
 
 (require 'package)     ;; this loads the contents of packages.el
 
-(setq package-archives '(("melpa" . "https://melpa.org/packages/")               ;; The package-archives variable is supposed to contain a list of kv-pairs for the name of a
-                         ("org" . "https://orgmode.org/elpa/")                   ;; package repository and its url
-                         ("elpa" . "https://elpa.gnu.org/packages/")))
+(setq package-archives '(("melpa" . "https://melpa.org/packages/")
+                         ("nongnu" . "https://elpa.nongnu.org/nongnu/")               ;; The package-archives variable is supposed to contain a list of kv-pairs for the name of a
+						 ;; package repository and its url
+						 ("elpa" . "https://elpa.gnu.org/packages/")))
 
 (package-initialize)       ;; a function from package.el that initializes the package system
 
@@ -54,7 +55,7 @@
 (add-to-list 'load-path "~/.my-emacs/emacs-which-key") ;; had to manually install which-key because there was some trouble finding it in the package
 (require 'which-key)
 (which-key-mode)
-(setq which-key-idle-delay 0)
+(setq which-key-idle-delay 0.5)
 
 
 (use-package ivy-rich    ;; more meaningful and helpful information regarding commands and variables within ivy
@@ -75,6 +76,9 @@
   ([remap describe-command] . helpful-command)
   ([remap describe-variable] . counsel-describe-variable)
   ([remap describe-key] . helpful-key))
+
+(use-package rainbow-delimiters   
+  :hook (text-mode . rainbow-delimiters-mode))
 
 (use-package all-the-icons) ;; needed for doom-modeline
 
@@ -148,11 +152,11 @@
 
 (defun efs/org-mode-visual-fill ()
   (setq visual-fill-column-width 110
-        visual-fill-column-center-text t
-  (visual-fill-column-mode 1)))
+        visual-fill-column-center-text t)
+  (visual-fill-column-mode 1))
 
 (use-package org
-  :hook (org-mode . system-crafters/org-mode-setup) 
+  :hook (org-mode . system-crafters/org-font-setup) 
   :config
   (setq org-ellipsis " ▾")
   (system-crafters/org-font-setup))
@@ -163,6 +167,18 @@
 
 (use-package visual-fill-column
   :hook (org-mode . efs/org-mode-visual-fill))
+
+(use-package org-roam
+	  :ensure t
+	  :init (setq org-roam-v2-ack t)
+	  :custom
+	  (org-roam-directory "~/Documents/RoamHome")
+	  :bind (("C-c n l" . org-roam)
+			 ("C-c n f" . org-roam-find-file)
+			 ("C-c n g" . org-roam-show-graph)
+			 ("C-c n i" . org-roam-insert))
+	  :config
+(org-roam-setup))
 
 (use-package smartparens
   :hook (prog-mode . smartparens-mode))    ;; get autocompletion of parentheses and other delimiters
@@ -175,6 +191,16 @@
                           :global-prefix "C-SPC")      ;; works in evil insert mode as well
   (mm/leader-keys
    "." '(counsel-find-file :which-key "find-files")))
+
+(use-package lsp-mode
+  :commands (lsp lsp-deferred)
+  :init
+  (setq lsp-keymap-prefix "C-c l")  ;; Or 'C-l', 's-l'
+  :config
+  (lsp-enable-which-key-integration t))
+
+(use-package lispy)
+(add-hook 'emacs-lisp-mode-hook (lambda () (lispy-mode 1)))
 
 (setq inhibit-startup-message t)
 
@@ -191,9 +217,9 @@
 
 (column-number-mode)
 (setq-default display-line-numbers 'visual          ;; this sets displays the line number to relative AND accounts for folding in things like org mode
-	      display-line-numbers-current-absolute t
-	      display-line-numbers-width 2
-	      display-line-numbers-widen t)
+	   display-line-numbers-current-absolute t
+	   display-line-numbers-width 2
+	   display-line-numbers-widen t)
 
 (global-set-key (kbd "<escape>") 'keyboard-escape-quit)      ;; Use <esc> to exit prompts
 
@@ -244,8 +270,8 @@
 
 (defun efs/org-mode-visual-fill ()
   (setq visual-fill-column-width 110
-        visual-fill-column-center-text t
-  (visual-fill-column-mode 1)))
+        visual-fill-column-center-text t)
+  (visual-fill-column-mode 1))
 
 (add-hook 'org-mode-hook 'visual-fill-column-mode)
 (add-hook 'org-mode-hook 'visual-line-mode)
@@ -253,3 +279,9 @@
 (dolist (mode '(shell-mode-hook     ;; what this does is that is iterates through the list of hooks and adds the lambda expression inside those hooks
 		eshell-mode-hook))
   (add-hook mode (lambda () (display-line-numbers-mode 0))))
+
+(use-package typescript-mode
+  :mode "\\.ts\\'"
+  :hook (typescript-mode . lsp-deferred)
+  :config
+  (setq typescript-indent-level 2))

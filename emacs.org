@@ -6,28 +6,29 @@
 
 #+begin_src emacs-lisp 
 
-;; Initialize package sources
+  ;; Initialize package sources
 
 
-(require 'package)     ;; this loads the contents of packages.el
+  (require 'package)     ;; this loads the contents of packages.el
 
-(setq package-archives '(("melpa" . "https://melpa.org/packages/")               ;; The package-archives variable is supposed to contain a list of kv-pairs for the name of a
-                         ("org" . "https://orgmode.org/elpa/")                   ;; package repository and its url
-                         ("elpa" . "https://elpa.gnu.org/packages/")))
+  (setq package-archives '(("melpa" . "https://melpa.org/packages/")
+                           ("nongnu" . "https://elpa.nongnu.org/nongnu/")               ;; The package-archives variable is supposed to contain a list of kv-pairs for the name of a
+						   ;; package repository and its url
+						   ("elpa" . "https://elpa.gnu.org/packages/")))
 
-(package-initialize)       ;; a function from package.el that initializes the package system
+  (package-initialize)       ;; a function from package.el that initializes the package system
 
-(unless package-archive-contents  ;; makes sure that package-archive-contents is updated with all the emacs lisp package archives
- (package-refresh-contents))
+  (unless package-archive-contents  ;; makes sure that package-archive-contents is updated with all the emacs lisp package archives
+   (package-refresh-contents))
 
-;; Initialize use-package on non-Linux platforms
+  ;; Initialize use-package on non-Linux platforms
 
-(unless (package-installed-p 'use-package)   ;; If the use-package package manager is not installed then install it
-   (package-install 'use-package))
+  (unless (package-installed-p 'use-package)   ;; If the use-package package manager is not installed then install it
+	 (package-install 'use-package))
 
-(require 'use-package)   ;; load 'use-package
+  (require 'use-package)   ;; load 'use-package
 
-(setq use-package-always-ensure t)     ;; makes sure that ':ensure' is set to true in all the use-package forms
+  (setq use-package-always-ensure t)     ;; makes sure that ':ensure' is set to true in all the use-package forms
 #+end_src
 ** Installing packages
 *** Ivy packages
@@ -58,7 +59,7 @@
 (add-to-list 'load-path "~/.my-emacs/emacs-which-key") ;; had to manually install which-key because there was some trouble finding it in the package
 (require 'which-key)
 (which-key-mode)
-(setq which-key-idle-delay 0)
+(setq which-key-idle-delay 0.5)
 
 
 (use-package ivy-rich    ;; more meaningful and helpful information regarding commands and variables within ivy
@@ -87,6 +88,12 @@
   ([remap describe-key] . helpful-key))
 	#+end_src
 *** Rainbow delimiters
+	I like having my parentheses to be color-coded so I can know what the structure is.
+	#+begin_src emacs-lisp
+(use-package rainbow-delimiters   
+  :hook (text-mode . rainbow-delimiters-mode))
+
+	#+end_src
 *** All-the-icons
 	#+begin_src emacs-lisp
 (use-package all-the-icons) ;; needed for doom-modeline
@@ -151,7 +158,7 @@
 	 #+begin_src emacs-lisp :noweb tangle
 <<system-crafter/org-font-setup-func-def>>
 (use-package org
-  :hook (org-mode . system-crafters/org-mode-setup) 
+  :hook (org-mode . system-crafters/org-font-setup) 
   :config
   (setq org-ellipsis " ▾")
   (system-crafters/org-font-setup))
@@ -167,6 +174,21 @@
 (use-package visual-fill-column
   :hook (org-mode . efs/org-mode-visual-fill))
 	 #+end_src
+**** Org-roam
+	#+begin_src emacs-lisp
+	  (use-package org-roam
+			:ensure t
+			:init (setq org-roam-v2-ack t)
+			:custom
+			(org-roam-directory "~/Documents/RoamHome")
+			:bind (("C-c n l" . org-roam)
+				   ("C-c n f" . org-roam-find-file)
+				   ("C-c n g" . org-roam-show-graph)
+				   ("C-c n i" . org-roam-insert))
+			:config
+	  (org-roam-setup))
+
+	#+end_src
 *** Smartparens
 	#+begin_src emacs-lisp
 (use-package smartparens
@@ -183,6 +205,21 @@
   (mm/leader-keys
    "." '(counsel-find-file :which-key "find-files")))
 	#+end_src
+*** LSP-mode
+	#+begin_src emacs-lisp
+(use-package lsp-mode
+  :commands (lsp lsp-deferred)
+  :init
+  (setq lsp-keymap-prefix "C-c l")  ;; Or 'C-l', 's-l'
+  :config
+  (lsp-enable-which-key-integration t))
+	#+end_src
+*** Lispy 
+	Install lispy and use it in emacs-mode
+#+begin_src emacs-lisp 
+(use-package lispy)
+(add-hook 'emacs-lisp-mode-hook (lambda () (lispy-mode 1)))
+#+end_src
 * UI Configuration
 ** Removal of the first default emacs things
   The first line prevents the assult from emacs' default message on startup. What follows is the removal of all the unnecessary UI elements for someone who prefers using the keyboard more than the mouse.
@@ -217,8 +254,8 @@
    #+end_src
 ** Relative line numbers like in vim
    #+begin_src emacs-lisp
-(column-number-mode)
-(setq-default display-line-numbers 'visual          ;; this sets displays the line number to relative AND accounts for folding in things like org mode
+   (column-number-mode)
+   (setq-default display-line-numbers 'visual          ;; this sets displays the line number to relative AND accounts for folding in things like org mode
 	      display-line-numbers-current-absolute t
 	      display-line-numbers-width 2
 	      display-line-numbers-widen t)
@@ -271,7 +308,9 @@
    #+end_src
 
 ** Look
-   This is tangled right above the org package's installation. Tangling it above the org-installation declaration is part of my ugly solution to get the function references times correctly
+
+   The following code block is tangled right above the org package's installation. Tangling it above the org installation is my solution to have the definition of the function defined before its invocation.
+
 #+begin_src emacs-lisp :noweb-ref system-crafter/org-font-setup-func-def
 (defun system-crafters/org-font-setup ()
   ;; Replace list hyphen with dot
@@ -302,12 +341,12 @@
 
 (defun efs/org-mode-visual-fill ()
   (setq visual-fill-column-width 110
-        visual-fill-column-center-text t
-  (visual-fill-column-mode 1)))
+        visual-fill-column-center-text t)
+  (visual-fill-column-mode 1))
 
 #+end_src
 
-And this of course has to be called after the visual-fill mode package has been installed
+And this of course has to be called after the visual-fill-column package has been installed
 #+begin_src emacs-lisp
 
 (add-hook 'org-mode-hook 'visual-fill-column-mode)
@@ -320,3 +359,14 @@ And this of course has to be called after the visual-fill mode package has been 
 		eshell-mode-hook))
   (add-hook mode (lambda () (display-line-numbers-mode 0))))
   #+end_src
+* Languages
+** Typescript
+   #+begin_src emacs-lisp 
+(use-package typescript-mode
+  :mode "\\.ts\\'"
+  :hook (typescript-mode . lsp-deferred)
+  :config
+  (setq typescript-indent-level 2))
+   #+end_src
+
+   
